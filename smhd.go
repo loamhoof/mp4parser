@@ -6,36 +6,24 @@ import (
 )
 
 type smhdBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *smhdBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *smhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes2 := make([]byte, 2)
-	bytes4 := make([]byte, 4)
+	b2 := make([]byte, 2)
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes4)
-
-	b.length = l
-
-	if _, err := r.Seek(8, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	b.data = make(Pairs, 0, 1)
-
-	if _, err := r.Read(bytes2); err != nil {
-		return err
-	}
-	b.data = append(b.data, &Pair{"balance", binary.BigEndian.Uint16(bytes2)})
+	b.fields = append(b.fields, &Field{"balance", binary.BigEndian.Uint16(b2), offset, 16})
 
 	return nil
 }
@@ -45,17 +33,17 @@ func (b *smhdBox) Type() string {
 }
 
 func (b *smhdBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *smhdBox) Length() uint32 {
-	return b.length
+func (b *smhdBox) Size() uint64 {
+	return b.size
 }
 
 func (b *smhdBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *smhdBox) Data() Pairs {
-	return b.data
+func (b *smhdBox) Data() Fields {
+	return b.fields
 }

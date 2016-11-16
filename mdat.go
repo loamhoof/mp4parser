@@ -1,29 +1,21 @@
 package mp4parser
 
 import (
-	"encoding/binary"
-"io"
+	"io"
 )
 
 type mdatBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *mdatBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *mdatBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, _, _, fields, err := parseBox(r, startOffset)
+	if err != nil {
 		return err
 	}
-
-	bytes4 := make([]byte, 4)
-
-	if _, err := r.Read(bytes4); err != nil {
-		return err
-	}
-	l := binary.BigEndian.Uint32(bytes4)
-
-	b.length = l
+	b.size = size
+	b.fields = fields
 
 	return nil
 }
@@ -33,17 +25,17 @@ func (b *mdatBox) Type() string {
 }
 
 func (b *mdatBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *mdatBox) Length() uint32 {
-	return b.length
+func (b *mdatBox) Size() uint64 {
+	return b.size
 }
 
 func (b *mdatBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *mdatBox) Data() Pairs {
-	return nil
+func (b *mdatBox) Data() Fields {
+	return b.fields
 }

@@ -6,54 +6,46 @@ import (
 )
 
 type sttsBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *sttsBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *sttsBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes4 := make([]byte, 4)
+	b4 := make([]byte, 4)
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes4)
+	entryCount := binary.BigEndian.Uint32(b4)
+	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
+	offset += 4
 
-	b.length = l
-
-	if _, err := r.Seek(8, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	b.data = make(Pairs, 0, 2)
-
-	if _, err := r.Read(bytes4); err != nil {
-		return err
-	}
-	entryCount := binary.BigEndian.Uint32(bytes4)
-	b.data = append(b.data, &Pair{"entry_count", entryCount})
-
-	entries := make([]Pairs, entryCount)
+	entries := make([]Fields, entryCount)
 	for i := 0; uint32(i) < entryCount; i++ {
-		entry := make(Pairs, 0, 2)
+		entry := make(Fields, 0, 2)
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		entry = append(entry, &Pair{"sample_count", binary.BigEndian.Uint32(bytes4)})
+		entry = append(entry, &Field{"sample_count", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		entry = append(entry, &Pair{"sample_delta", binary.BigEndian.Uint32(bytes4)})
+		entry = append(entry, &Field{"sample_delta", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
 		entries[i] = entry
 	}
-	b.data = append(b.data, &Pair{"entries", entries})
+	b.fields = append(b.fields, &Field{"entries", entryCount, offset, 64 * uint64(entryCount)}) // TODO offset
 
 	return nil
 }
@@ -63,17 +55,17 @@ func (b *sttsBox) Type() string {
 }
 
 func (b *sttsBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *sttsBox) Length() uint32 {
-	return b.length
+func (b *sttsBox) Size() uint64 {
+	return b.size
 }
 
 func (b *sttsBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *sttsBox) Data() Pairs {
-	return b.data
+func (b *sttsBox) Data() Fields {
+	return b.fields
 }

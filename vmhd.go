@@ -6,45 +6,34 @@ import (
 )
 
 type vmhdBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *vmhdBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *vmhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes2 := make([]byte, 2)
-	bytes4 := make([]byte, 4)
+	b2 := make([]byte, 2)
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes4)
-
-	b.length = l
-
-	if _, err := r.Seek(8, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	b.data = make(Pairs, 0, 2)
-
-	if _, err := r.Read(bytes2); err != nil {
-		return err
-	}
-	b.data = append(b.data, &Pair{"graphicsmode", binary.BigEndian.Uint16(bytes2)})
+	b.fields = append(b.fields, &Field{"graphicsmode", binary.BigEndian.Uint16(b2), offset, 16})
+	offset += 2
 
 	var opcolor [3]uint16
 	for i := 0; i < 3; i++ {
-		if _, err := r.Read(bytes2); err != nil {
+		if _, err := r.Read(b2); err != nil {
 			return err
 		}
-		opcolor[i] = binary.BigEndian.Uint16(bytes2)
+		opcolor[i] = binary.BigEndian.Uint16(b2)
 	}
-	b.data = append(b.data, &Pair{"opcolor", opcolor})
+	b.fields = append(b.fields, &Field{"opcolor", opcolor, offset, 48})
 
 	return nil
 }
@@ -54,17 +43,17 @@ func (b *vmhdBox) Type() string {
 }
 
 func (b *vmhdBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *vmhdBox) Length() uint32 {
-	return b.length
+func (b *vmhdBox) Size() uint64 {
+	return b.size
 }
 
 func (b *vmhdBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *vmhdBox) Data() Pairs {
-	return b.data
+func (b *vmhdBox) Data() Fields {
+	return b.fields
 }

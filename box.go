@@ -1,89 +1,77 @@
 package mp4parser
 
 import (
-	"fmt"
 	"io"
 )
 
 type Box interface {
-	Parse(io.ReadSeeker) error
+	Parse(r io.ReadSeeker, offset int64) error
 	Type() string
 	Offset() int64
-	Length() uint32
+	Size() uint64
 	Children() []Box
-	Data() Pairs
+	Data() Fields
 }
 
-type Pair struct {
-	Key   string
-	Value interface{}
-}
-
-func (p *Pair) String() string {
-	return fmt.Sprintf("%s: %v", p.Key, p.Value)
-}
-
-type Pairs []*Pair
-
-func newBox(_type string, offset int64) Box {
+func newBox(_type string) Box {
 	switch _type {
-	case "moov", "trak", "mdia", "moof", "mfra", "minf", "dinf", "stbl", "mvex", "traf", "edts", "udta":
-		return &containerBox{_type: _type, offset: offset}
-	case "mfro":
-		return &mfroBox{offset: offset}
-	case "free", "skip":
-		return &freeBox{offset: offset}
-	case "tfra":
-		return &tfraBox{offset: offset}
-	case "mvhd":
-		return &mvhdBox{offset: offset}
-	case "ftyp":
-		return &ftypBox{offset: offset}
-	case "tkhd":
-		return &tkhdBox{offset: offset}
-	case "mdhd":
-		return &mdhdBox{offset: offset}
-	case "hdlr":
-		return &hdlrBox{offset: offset}
-	case "vmhd":
-		return &vmhdBox{offset: offset}
-	case "dref":
-		return &drefBox{offset: offset}
-	case "url":
-		return &urlBox{offset: offset}
-	case "mehd":
-		return &mehdBox{offset: offset}
-	case "trex":
-		return &trexBox{offset: offset}
-	case "mfhd":
-		return &mfhdBox{offset: offset}
-	case "tfhd":
-		return &tfhdBox{offset: offset}
-	case "trun":
-		return &trunBox{offset: offset}
-	case "mdat":
-		return &mdatBox{offset: offset}
-	case "subs":
-		return &subsBox{offset: offset}
-	case "stts":
-		return &sttsBox{offset: offset}
-	case "stss":
-		return &stssBox{offset: offset}
-	case "ctts":
-		return &cttsBox{offset: offset}
-	case "stsc":
-		return &stscBox{offset: offset}
-	case "stsz":
-		return &stszBox{offset: offset}
-	case "stco":
-		return &stcoBox{offset: offset}
-	case "elst":
-		return &elstBox{offset: offset}
-	case "smhd":
-		return &smhdBox{offset: offset}
-	case "meta":
-		return &metaBox{offset: offset}
 	default:
-		return &unknownBox{_type: _type, offset: offset}
+		return &unknownBox{_type: _type}
+	case "moov", "trak", "mdia", "moof", "mfra", "minf", "dinf", "stbl", "mvex", "traf", "edts", "udta":
+		return &containerBox{_type: _type}
+	case "ftyp":
+		return &ftypBox{}
+	case "free", "skip":
+		return &freeBox{}
+	case "mvhd":
+		return &mvhdBox{}
+	case "tkhd":
+		return &tkhdBox{}
+	case "elst":
+		return &elstBox{}
+	case "mdhd":
+		return &mdhdBox{}
+	case "hdlr":
+		return &hdlrBox{}
+	case "smhd":
+		return &smhdBox{}
+	case "vmhd":
+		return &vmhdBox{}
+	case "dref":
+		return &drefBox{}
+	case "url":
+		return &urlBox{}
+	case "stts":
+		return &sttsBox{}
+	case "stss":
+		return &stssBox{}
+	case "ctts":
+		return &cttsBox{}
+	case "stsc":
+		return &stscBox{}
+	case "stsz":
+		return &stszBox{}
+	case "stco":
+		return &stcoBox{}
+	case "trex":
+		return &trexBox{}
+	case "mehd":
+		return &mehdBox{}
+	case "mfhd":
+		return &mfhdBox{}
+	case "tfhd":
+		return &tfhdBox{}
+	case "trun":
+		return &trunBox{}
+	case "subs":
+		return &subsBox{}
+	case "mdat":
+		return &mdatBox{}
+	case "tfra":
+		return &tfraBox{}
+	case "mfro":
+		return &mfroBox{}
+	case "meta":
+		return &metaBox{}
 	}
 }

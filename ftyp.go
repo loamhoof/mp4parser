@@ -6,50 +6,41 @@ import (
 )
 
 type ftypBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *ftypBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, fields, err := parseBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes := make([]byte, 4)
+	b4 := make([]byte, 4)
 
-	if _, err := r.Read(bytes); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes)
+	b.fields = append(b.fields, &Field{"major_brand", string(b4), offset, 32})
+	offset += 4
 
-	b.length = l
-
-	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
+	b.fields = append(b.fields, &Field{"minor_version", binary.BigEndian.Uint32(b4), offset, 32})
+	offset += 4
 
-	b.data = make(Pairs, 0, 3)
-
-	if _, err := r.Read(bytes); err != nil {
-		return err
-	}
-	b.data = append(b.data, &Pair{"major_brand", string(bytes)})
-
-	if _, err := r.Read(bytes); err != nil {
-		return err
-	}
-	b.data = append(b.data, &Pair{"minor_version", binary.BigEndian.Uint32(bytes)})
-
-	nBrands := (l - 16) / 4
+	nBrands := (size - 16) / 4
 	compatibleBrands := make([]string, nBrands)
-	for i := 0; uint32(i) < nBrands; i++ {
-		if _, err := r.Read(bytes); err != nil {
+	for i := 0; uint64(i) < nBrands; i++ {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		compatibleBrands[i] = string(bytes)
+		compatibleBrands[i] = string(b4)
 	}
-	b.data = append(b.data, &Pair{"compatible_brands", compatibleBrands})
+	b.fields = append(b.fields, &Field{"compatible_brands", compatibleBrands, offset, 32 * nBrands})
 
 	return nil
 }
@@ -59,17 +50,17 @@ func (b *ftypBox) Type() string {
 }
 
 func (b *ftypBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *ftypBox) Length() uint32 {
-	return b.length
+func (b *ftypBox) Size() uint64 {
+	return b.size
 }
 
 func (b *ftypBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *ftypBox) Data() Pairs {
-	return b.data
+func (b *ftypBox) Data() Fields {
+	return b.fields
 }

@@ -2,26 +2,27 @@ package mp4parser
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
+	"strings"
 )
 
-type mp4Box struct {
+type MP4 struct {
 	children []Box
 }
 
-func (b *mp4Box) Parse(r io.ReadSeeker) error {
+func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
 	if closer, ok := r.(io.Closer); ok {
 		defer closer.Close()
 	}
 
-	var offset int64
+	bytes := make([]byte, 4)
+
 	children := make([]Box, 0, 1)
 	for {
 		if _, err := r.Seek(offset, io.SeekStart); err != nil {
 			break
 		}
-
-		bytes := make([]byte, 4)
 
 		if _, err := r.Read(bytes); err != nil {
 			if err == io.EOF {
@@ -36,8 +37,8 @@ func (b *mp4Box) Parse(r io.ReadSeeker) error {
 		}
 		boxType := string(bytes)
 
-		box := newBox(boxType, offset)
-		if err := box.Parse(r); err != nil {
+		box := newBox(boxType)
+		if err := box.Parse(r, offset); err != nil {
 			return err
 		}
 		children = append(children, box)
@@ -45,27 +46,52 @@ func (b *mp4Box) Parse(r io.ReadSeeker) error {
 		offset += int64(l)
 	}
 
-	b.children = children
+	m.children = children
 
 	return nil
 }
 
-func (b *mp4Box) Type() string {
+func (m *MP4) Type() string {
 	return "mp4"
 }
 
-func (b *mp4Box) Offset() int64 {
+func (m *MP4) Offset() int64 {
 	return 0
 }
 
-func (b *mp4Box) Length() uint32 {
-	return 0
+func (m *MP4) Size() uint64 {
+	var size uint64 = 0
+	for _, b := range m.Children() {
+		size += b.Size()
+	}
+
+	return size
 }
 
-func (b *mp4Box) Children() []Box {
-	return b.children
+func (m *MP4) Children() []Box {
+	return m.children
 }
 
-func (b *mp4Box) Data() Pairs {
+func (m *MP4) Data() Fields {
 	return nil
+}
+
+func (m *MP4) String() string {
+	return fmtChildren(m, 0)
+}
+
+func fmtChildren(b Box, offset int) string {
+	str := ""
+
+	for _, child := range b.Children() {
+		str += fmtBox(child, offset)
+	}
+
+	return str
+}
+
+func fmtBox(b Box, offset int) string {
+	str := fmt.Sprintf("%s%s (%v, %v)\n", strings.Repeat("-", offset*2), b.Type(), b.Offset(), b.Size())
+
+	return str + fmtChildren(b, offset+1)
 }

@@ -6,116 +6,108 @@ import (
 )
 
 type mvhdBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *mvhdBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *mvhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes1 := make([]byte, 1)
-	bytes2 := make([]byte, 2)
-	bytes4 := make([]byte, 4)
-	bytes8 := make([]byte, 8)
-
-	if _, err := r.Read(bytes4); err != nil {
-		return err
-	}
-	l := binary.BigEndian.Uint32(bytes4)
-
-	b.length = l
-
-	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	if _, err := r.Read(bytes1); err != nil {
-		return err
-	}
-	version := bytes1[0]
-
-	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	b.data = make(Pairs, 0, 8)
+	b2 := make([]byte, 2)
+	b4 := make([]byte, 4)
+	b8 := make([]byte, 8)
 
 	if version == 1 {
-		if _, err := r.Read(bytes8); err != nil {
+		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"creation_time", binary.BigEndian.Uint64(bytes8)})
+		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint64(b8), offset, 64})
+		offset += 8
 
-		if _, err := r.Read(bytes8); err != nil {
+		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"modification_time", binary.BigEndian.Uint64(bytes8)})
+		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint64(b8), offset, 64})
+		offset += 8
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"timescale", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
-		if _, err := r.Read(bytes8); err != nil {
+		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"duration", binary.BigEndian.Uint64(bytes8)})
+		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint64(b8), offset, 64})
+		offset += 8
 	} else {
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"creation_time", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"modification_time", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"timescale", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"duration", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 	}
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.data = append(b.data, &Pair{"rate", binary.BigEndian.Uint32(bytes4)})
+	b.fields = append(b.fields, &Field{"rate", binary.BigEndian.Uint32(b4), offset, 32})
+	offset += 4
 
-	if _, err := r.Read(bytes2); err != nil {
+	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.data = append(b.data, &Pair{"volume", binary.BigEndian.Uint16(bytes2)})
+	b.fields = append(b.fields, &Field{"volume", binary.BigEndian.Uint16(b2), offset, 16})
+	offset += 2
 
 	if _, err := r.Seek(10, io.SeekCurrent); err != nil {
 		return err
 	}
+	offset += 10
 
 	var matrix [9]uint32
 	for i := 0; i < 9; i++ {
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		matrix[i] = binary.BigEndian.Uint32(bytes4)
+		matrix[i] = binary.BigEndian.Uint32(b4)
 	}
-	b.data = append(b.data, &Pair{"matrix", matrix})
+	b.fields = append(b.fields, &Field{"matrix", matrix, offset, 288})
+	offset += 36
 
 	if _, err := r.Seek(24, io.SeekCurrent); err != nil {
 		return err
 	}
+	offset += 24
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.data = append(b.data, &Pair{"next_track_ID", binary.BigEndian.Uint32(bytes4)})
+	b.fields = append(b.fields, &Field{"next_track_ID", binary.BigEndian.Uint32(b4), offset, 32})
 
 	return nil
 }
@@ -125,17 +117,17 @@ func (b *mvhdBox) Type() string {
 }
 
 func (b *mvhdBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *mvhdBox) Length() uint32 {
-	return b.length
+func (b *mvhdBox) Size() uint64 {
+	return b.size
 }
 
 func (b *mvhdBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *mvhdBox) Data() Pairs {
-	return b.data
+func (b *mvhdBox) Data() Fields {
+	return b.fields
 }

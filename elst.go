@@ -6,88 +6,74 @@ import (
 )
 
 type elstBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *elstBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *elstBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes1 := make([]byte, 1)
-	bytes2 := make([]byte, 2)
-	bytes4 := make([]byte, 4)
-	bytes8 := make([]byte, 8)
+	b2 := make([]byte, 2)
+	b4 := make([]byte, 4)
+	b8 := make([]byte, 8)
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes4)
+	entryCount := binary.BigEndian.Uint32(b4)
+	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
+	offset += 4
 
-	b.length = l
-
-	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	if _, err := r.Read(bytes1); err != nil {
-		return err
-	}
-	version := bytes1[0]
-
-	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	b.data = make(Pairs, 0, 2)
-
-	if _, err := r.Read(bytes4); err != nil {
-		return err
-	}
-	entryCount := binary.BigEndian.Uint32(bytes4)
-	b.data = append(b.data, &Pair{"entry_count", entryCount})
-
-	entries := make([]Pairs, entryCount)
+	entries := make([]Fields, entryCount)
 	for i := 0; uint32(i) < entryCount; i++ {
-		entry := make(Pairs, 0, 4)
+		entry := make(Fields, 0, 4)
 
 		if version == 1 {
-			if _, err := r.Read(bytes8); err != nil {
+			if _, err := r.Read(b8); err != nil {
 				return err
 			}
-			entry = append(entry, &Pair{"segment_duration", binary.BigEndian.Uint64(bytes8)})
+			entry = append(entry, &Field{"segment_duration", binary.BigEndian.Uint64(b8), offset, 64})
+			offset += 8
 
-			if _, err := r.Read(bytes8); err != nil {
+			if _, err := r.Read(b8); err != nil {
 				return err
 			}
-			entry = append(entry, &Pair{"media_time", binary.BigEndian.Uint64(bytes8)})
+			entry = append(entry, &Field{"media_time", binary.BigEndian.Uint64(b8), offset, 64})
+			offset += 8
 		} else {
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			entry = append(entry, &Pair{"segment_duration", binary.BigEndian.Uint32(bytes4)})
+			entry = append(entry, &Field{"segment_duration", binary.BigEndian.Uint32(b4), offset, 32})
+			offset += 4
 
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			entry = append(entry, &Pair{"media_time", binary.BigEndian.Uint32(bytes4)})
+			entry = append(entry, &Field{"media_time", binary.BigEndian.Uint32(b4), offset, 32})
+			offset += 4
 		}
 
-		if _, err := r.Read(bytes2); err != nil {
+		if _, err := r.Read(b2); err != nil {
 			return err
 		}
-		entry = append(entry, &Pair{"media_rate_integer", binary.BigEndian.Uint16(bytes2)})
+		entry = append(entry, &Field{"media_rate_integer", binary.BigEndian.Uint16(b2), offset, 16})
+		offset += 2
 
-		if _, err := r.Read(bytes2); err != nil {
+		if _, err := r.Read(b2); err != nil {
 			return err
 		}
-		entry = append(entry, &Pair{"media_rate_fraction", binary.BigEndian.Uint16(bytes2)})
+		entry = append(entry, &Field{"media_rate_fraction", binary.BigEndian.Uint16(b2), offset, 16})
+		offset += 2
 
 		entries[i] = entry
 	}
-	b.data = append(b.data, &Pair{"entries", entries})
+	b.fields = append(b.fields, &Field{"entries", entries, offset, 0}) // TODO
 
 	return nil
 }
@@ -97,17 +83,17 @@ func (b *elstBox) Type() string {
 }
 
 func (b *elstBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *elstBox) Length() uint32 {
-	return b.length
+func (b *elstBox) Size() uint64 {
+	return b.size
 }
 
 func (b *elstBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *elstBox) Data() Pairs {
-	return b.data
+func (b *elstBox) Data() Fields {
+	return b.fields
 }

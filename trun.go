@@ -7,114 +7,95 @@ import (
 )
 
 type trunBox struct {
-	offset int64
-	length uint32
-	data   Pairs
+	size   uint64
+	fields Fields
 }
 
-func (b *trunBox) Parse(r io.ReadSeeker) error {
-	if _, err := r.Seek(b.offset, io.SeekStart); err != nil {
+func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
+	size, offset, _, version, flags, fields, err := parseFullBox(r, startOffset)
+	if err != nil {
 		return err
 	}
+	b.size = size
+	b.fields = fields
 
-	bytes1 := make([]byte, 1)
-	bytes2 := make([]byte, 2)
-	bytes4 := make([]byte, 4)
+	b4 := make([]byte, 4)
 
-	if _, err := r.Read(bytes4); err != nil {
+	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	l := binary.BigEndian.Uint32(bytes4)
-
-	b.length = l
-
-	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	if _, err := r.Read(bytes1); err != nil {
-		return err
-	}
-	version := bytes1[0]
-
-	if _, err := r.Seek(1, io.SeekCurrent); err != nil {
-		return err
-	}
-
-	if _, err := r.Read(bytes2); err != nil {
-		return err
-	}
-	flags := binary.BigEndian.Uint16(bytes2)
-
-	b.data = make(Pairs, 0, 4)
-
-	if _, err := r.Read(bytes4); err != nil {
-		return err
-	}
-	sampleCount := binary.BigEndian.Uint32(bytes4)
-	b.data = append(b.data, &Pair{"sample_count", sampleCount})
+	sampleCount := binary.BigEndian.Uint32(b4)
+	b.fields = append(b.fields, &Field{"sample_count", sampleCount, offset, 32})
+	offset += 4
 
 	if flags&0x01 == 0x01 {
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		dataOffset, read := binary.Varint(bytes4)
+		dataOffset, read := binary.Varint(b4)
 		if read <= 0 {
 			return errors.New("")
 		}
-		b.data = append(b.data, &Pair{"data_offset", dataOffset})
+		b.fields = append(b.fields, &Field{"data_offset", dataOffset, offset, 32})
+		offset += 4
 	}
 
 	if flags&0x04 == 0x04 {
-		if _, err := r.Read(bytes4); err != nil {
+		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.data = append(b.data, &Pair{"first_sample_flags", binary.BigEndian.Uint32(bytes4)})
+		b.fields = append(b.fields, &Field{"first_sample_flags", binary.BigEndian.Uint32(b4), offset, 32})
+		offset += 4
 	}
 
-	samples := make([]Pairs, sampleCount)
+	samples := make([]Fields, sampleCount)
 	for i := 0; uint32(i) < sampleCount; i++ {
-		sample := make(Pairs, 0, 4)
+		sample := make(Fields, 0, 4)
 
 		if flags>>8&0x01 == 0x01 {
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Pair{"sample_duration", binary.BigEndian.Uint32(bytes4)})
+			sample = append(sample, &Field{"sample_duration", binary.BigEndian.Uint32(b4), offset, 32})
+			offset += 4
 		}
 
 		if flags>>8&0x02 == 0x02 {
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Pair{"sample_size", binary.BigEndian.Uint32(bytes4)})
+			sample = append(sample, &Field{"sample_size", binary.BigEndian.Uint32(b4), offset, 32})
+			offset += 4
 		}
 
 		if flags>>8&0x04 == 0x04 {
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Pair{"sample_flags", binary.BigEndian.Uint32(bytes4)})
+			sample = append(sample, &Field{"sample_flags", binary.BigEndian.Uint32(b4), offset, 32})
+			offset += 4
 		}
 
 		if flags>>8&0x08 == 0x08 {
-			if _, err := r.Read(bytes4); err != nil {
+			if _, err := r.Read(b4); err != nil {
 				return err
 			}
 			if version == 0 {
-				sample = append(sample, &Pair{"sample_composition_time_offset", binary.BigEndian.Uint32(bytes4)})
+				sample = append(sample, &Field{"sample_composition_time_offset", binary.BigEndian.Uint32(b4), offset, 32})
+				offset += 4
 			} else {
-				sampleCompositionTimeOffset, read := binary.Varint(bytes4)
+				sampleCompositionTimeOffset, read := binary.Varint(b4)
 				if read <= 0 {
 					return errors.New("")
 				}
-				sample = append(sample, &Pair{"sample_composition_time_offset", sampleCompositionTimeOffset})
+				sample = append(sample, &Field{"sample_composition_time_offset", sampleCompositionTimeOffset, offset, 32})
+				offset += 4
 			}
 		}
 
 		samples[i] = sample
 	}
-	b.data = append(b.data, &Pair{"samples", samples})
+	b.fields = append(b.fields, &Field{"samples", samples, offset, 0}) //TODO
 
 	return nil
 }
@@ -124,17 +105,17 @@ func (b *trunBox) Type() string {
 }
 
 func (b *trunBox) Offset() int64 {
-	return b.offset
+	return b.fields[0].Offset
 }
 
-func (b *trunBox) Length() uint32 {
-	return b.length
+func (b *trunBox) Size() uint64 {
+	return b.size
 }
 
 func (b *trunBox) Children() []Box {
 	return []Box{}
 }
 
-func (b *trunBox) Data() Pairs {
-	return b.data
+func (b *trunBox) Data() Fields {
+	return b.fields
 }
