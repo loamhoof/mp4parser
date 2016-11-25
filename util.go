@@ -25,14 +25,14 @@ func parseBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64, _t
 		return
 	}
 	size = uint64(binary.BigEndian.Uint32(b4))
-	fields = append(fields, &Field{"size", size, offset, 32})
+	fields = append(fields, &Field{"size", size, offset, 32, 0})
 	offset += 4
 
 	if _, err = r.Read(b4); err != nil {
 		return
 	}
 	_type = string(b4)
-	fields = append(fields, &Field{"type", _type, offset, 32})
+	fields = append(fields, &Field{"type", _type, offset, 32, 0})
 	offset += 4
 
 	if size == 1 {
@@ -40,7 +40,7 @@ func parseBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64, _t
 			return
 		}
 		size = binary.BigEndian.Uint64(b8)
-		fields = append(fields, &Field{"largesize", size, offset, 64})
+		fields = append(fields, &Field{"largesize", size, offset, 64, 0})
 		offset += 8
 	} else if size == 0 {
 		var fileSize int64
@@ -59,7 +59,7 @@ func parseBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64, _t
 		if _, err = r.Read(b16); err != nil {
 			return
 		}
-		fields = append(fields, &Field{"usertype", string(b16), offset, 128})
+		fields = append(fields, &Field{"usertype", string(b16), offset, 128, 0})
 	}
 
 	return
@@ -81,8 +81,8 @@ func parseFullBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64
 	flags = binary.BigEndian.Uint32(b4) & 0xFFFFFF
 	offset += 4
 
-	fields = append(fields, &Field{"version", version, offset, 8})
-	fields = append(fields, &Field{"flags", flags, offset, 24})
+	fields = append(fields, &Field{"version", version, offset, 8, 0})
+	fields = append(fields, &Field{"flags", flags, offset, 24, 0})
 
 	return
 }

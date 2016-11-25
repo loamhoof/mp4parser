@@ -26,19 +26,19 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint64(b8), offset, 64})
+		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint64(b8), offset, 64, 0})
 		offset += 8
 
 		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint64(b8), offset, 64})
+		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint64(b8), offset, 64, 0})
 		offset += 8
 
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Seek(4, io.SeekCurrent); err != nil {
@@ -49,25 +49,25 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint64(b8), offset, 64})
+		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint64(b8), offset, 64, 0})
 		offset += 8
 	} else {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"creation_time", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"modification_time", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Seek(4, io.SeekCurrent); err != nil {
@@ -78,7 +78,7 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"duration", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 
@@ -90,19 +90,19 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"layer", binary.BigEndian.Uint16(b2), offset, 16})
+	b.fields = append(b.fields, &Field{"layer", binary.BigEndian.Uint16(b2), offset, 16, 0})
 	offset += 2
 
 	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"alternate_group", binary.BigEndian.Uint16(b2), offset, 16})
+	b.fields = append(b.fields, &Field{"alternate_group", binary.BigEndian.Uint16(b2), offset, 16, 0})
 	offset += 2
 
 	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"volume", binary.BigEndian.Uint16(b2), offset, 16})
+	b.fields = append(b.fields, &Field{"volume", binary.BigEndian.Uint16(b2), offset, 16, 0})
 	offset += 2
 
 	if _, err := r.Seek(2, io.SeekCurrent); err != nil {
@@ -117,19 +117,19 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		}
 		matrix[i] = binary.BigEndian.Uint32(b4)
 	}
-	b.fields = append(b.fields, &Field{"matrix", matrix, offset, 288})
+	b.fields = append(b.fields, &Field{"matrix", matrix, offset, 288, 0})
 	offset += 36
 
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"width", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"width", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"height", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"height", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	return nil

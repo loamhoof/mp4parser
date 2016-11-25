@@ -24,14 +24,14 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if flags&0x01 == 0x01 {
 		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"base_data_offset", binary.BigEndian.Uint64(b8), offset, 64})
+		b.fields = append(b.fields, &Field{"base_data_offset", binary.BigEndian.Uint64(b8), offset, 64, 0})
 		offset += 8
 	}
 
@@ -39,7 +39,7 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"sample_description_index", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"sample_description_index", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 
@@ -47,7 +47,7 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"default_sample_duration", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"default_sample_duration", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 
@@ -55,7 +55,7 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"default_sample_size", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"default_sample_size", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 
@@ -63,7 +63,7 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"default_sample_flags", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"default_sample_flags", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 

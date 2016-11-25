@@ -23,7 +23,7 @@ func (b *smhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"balance", binary.BigEndian.Uint16(b2), offset, 16})
+	b.fields = append(b.fields, &Field{"balance", binary.BigEndian.Uint16(b2), offset, 16, 0})
 
 	return nil
 }

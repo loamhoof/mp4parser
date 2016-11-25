@@ -23,7 +23,7 @@ func (b *vmhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b2); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"graphicsmode", binary.BigEndian.Uint16(b2), offset, 16})
+	b.fields = append(b.fields, &Field{"graphicsmode", binary.BigEndian.Uint16(b2), offset, 16, 0})
 	offset += 2
 
 	var opcolor [3]uint16
@@ -33,7 +33,7 @@ func (b *vmhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		}
 		opcolor[i] = binary.BigEndian.Uint16(b2)
 	}
-	b.fields = append(b.fields, &Field{"opcolor", opcolor, offset, 48})
+	b.fields = append(b.fields, &Field{"opcolor", opcolor, offset, 48, 0})
 
 	return nil
 }

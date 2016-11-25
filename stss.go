@@ -24,7 +24,7 @@ func (b *stssBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		return err
 	}
 	entryCount := binary.BigEndian.Uint32(b4)
-	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
+	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32, 0})
 	offset += 4
 
 	entriesOffset := offset
@@ -33,10 +33,10 @@ func (b *stssBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		entries[i] = Fields{{"sample_number", binary.BigEndian.Uint32(b4), offset, 32}}
+		entries[i] = Fields{{"sample_number", binary.BigEndian.Uint32(b4), offset, 32, 0}}
 		offset += 4
 	}
-	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8})
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
 
 	return nil
 }

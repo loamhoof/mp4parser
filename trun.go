@@ -25,7 +25,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		return err
 	}
 	sampleCount := binary.BigEndian.Uint32(b4)
-	b.fields = append(b.fields, &Field{"sample_count", sampleCount, offset, 32})
+	b.fields = append(b.fields, &Field{"sample_count", sampleCount, offset, 32, 0})
 	offset += 4
 
 	if flags&0x01 == 0x01 {
@@ -36,7 +36,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if read <= 0 {
 			return errors.New("")
 		}
-		b.fields = append(b.fields, &Field{"data_offset", dataOffset, offset, 32})
+		b.fields = append(b.fields, &Field{"data_offset", dataOffset, offset, 32, 0})
 		offset += 4
 	}
 
@@ -44,7 +44,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"first_sample_flags", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"first_sample_flags", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 	}
 
@@ -57,7 +57,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Field{"sample_duration", binary.BigEndian.Uint32(b4), offset, 32})
+			sample = append(sample, &Field{"sample_duration", binary.BigEndian.Uint32(b4), offset, 32, 0})
 			offset += 4
 		}
 
@@ -65,7 +65,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Field{"sample_size", binary.BigEndian.Uint32(b4), offset, 32})
+			sample = append(sample, &Field{"sample_size", binary.BigEndian.Uint32(b4), offset, 32, 0})
 			offset += 4
 		}
 
@@ -73,7 +73,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			sample = append(sample, &Field{"sample_flags", binary.BigEndian.Uint32(b4), offset, 32})
+			sample = append(sample, &Field{"sample_flags", binary.BigEndian.Uint32(b4), offset, 32, 0})
 			offset += 4
 		}
 
@@ -82,21 +82,21 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 				return err
 			}
 			if version == 0 {
-				sample = append(sample, &Field{"sample_composition_time_offset", binary.BigEndian.Uint32(b4), offset, 32})
+				sample = append(sample, &Field{"sample_composition_time_offset", binary.BigEndian.Uint32(b4), offset, 32, 0})
 				offset += 4
 			} else {
 				sampleCompositionTimeOffset, read := binary.Varint(b4)
 				if read <= 0 {
 					return errors.New("")
 				}
-				sample = append(sample, &Field{"sample_composition_time_offset", sampleCompositionTimeOffset, offset, 32})
+				sample = append(sample, &Field{"sample_composition_time_offset", sampleCompositionTimeOffset, offset, 32, 0})
 				offset += 4
 			}
 		}
 
 		samples[i] = sample
 	}
-	b.fields = append(b.fields, &Field{"samples", samples, samplesOffset, uint64(offset-samplesOffset) * 8})
+	b.fields = append(b.fields, &Field{"samples", samples, samplesOffset, uint64(offset-samplesOffset) * 8, 0})
 
 	return nil
 }

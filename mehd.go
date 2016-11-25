@@ -25,12 +25,12 @@ func (b *mehdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"fragment_duration", binary.BigEndian.Uint32(b4), offset, 32})
+		b.fields = append(b.fields, &Field{"fragment_duration", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	} else {
 		if _, err := r.Read(b8); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"fragment_duration", binary.BigEndian.Uint64(b8), offset, 64})
+		b.fields = append(b.fields, &Field{"fragment_duration", binary.BigEndian.Uint64(b8), offset, 64, 0})
 	}
 
 	return nil

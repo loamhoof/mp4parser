@@ -23,7 +23,7 @@ func (b *mfroBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"size", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"size", binary.BigEndian.Uint32(b4), offset, 32, 0})
 
 	return nil
 }

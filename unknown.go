@@ -23,7 +23,7 @@ func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(bData); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"unknown", string(bData), offset, lData * 8})
+	b.fields = append(b.fields, &Field{"unknown", string(bData), offset, lData * 8, 0})
 
 	return nil
 }

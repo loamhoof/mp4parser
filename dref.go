@@ -25,7 +25,7 @@ func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		return err
 	}
 	entryCount := binary.BigEndian.Uint32(b4)
-	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
+	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32, 0})
 	offset += 4
 
 	b.children = make([]Box, 0, entryCount)

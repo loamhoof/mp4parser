@@ -25,7 +25,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
@@ -48,7 +48,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		return err
 	}
 	numberOfEntry := binary.BigEndian.Uint32(b4)
-	b.fields = append(b.fields, &Field{"number_of_entry", numberOfEntry, offset, 32})
+	b.fields = append(b.fields, &Field{"number_of_entry", numberOfEntry, offset, 32, 0})
 	offset += 4
 
 	entriesOffset := offset
@@ -60,25 +60,25 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			if _, err := r.Read(b8); err != nil {
 				return err
 			}
-			entry = append(entry, &Field{"time", binary.BigEndian.Uint64(b8), offset, 64})
+			entry = append(entry, &Field{"time", binary.BigEndian.Uint64(b8), offset, 64, 0})
 			offset += 8
 
 			if _, err := r.Read(b8); err != nil {
 				return err
 			}
-			entry = append(entry, &Field{"moof_offset", binary.BigEndian.Uint64(b8), offset, 64})
+			entry = append(entry, &Field{"moof_offset", binary.BigEndian.Uint64(b8), offset, 64, 0})
 			offset += 8
 		} else {
 			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			entry = append(entry, &Field{"time", binary.BigEndian.Uint32(b4), offset, 32})
+			entry = append(entry, &Field{"time", binary.BigEndian.Uint32(b4), offset, 32, 0})
 			offset += 4
 
 			if _, err := r.Read(b4); err != nil {
 				return err
 			}
-			entry = append(entry, &Field{"moof_offset", binary.BigEndian.Uint32(b4), offset, 32})
+			entry = append(entry, &Field{"moof_offset", binary.BigEndian.Uint32(b4), offset, 32, 0})
 			offset += 4
 		}
 
@@ -88,7 +88,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			return err
 		}
 		trafNumber := binary.BigEndian.Uint64(append(make([]byte, 8-lTraf), bTraf...))
-		entry = append(entry, &Field{"traf_number", trafNumber, offset, 8 * uint64(lTraf)})
+		entry = append(entry, &Field{"traf_number", trafNumber, offset, 8 * uint64(lTraf), 0})
 		offset += int64(lTraf)
 
 		lTrun := lengthSizeOfTrunNum + 1
@@ -97,7 +97,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			return err
 		}
 		trunNumber := binary.BigEndian.Uint64(append(make([]byte, 8-lTrun), bTrun...))
-		entry = append(entry, &Field{"trun_number", trunNumber, offset, 8 * uint64(lTrun)})
+		entry = append(entry, &Field{"trun_number", trunNumber, offset, 8 * uint64(lTrun), 0})
 		offset += int64(lTrun)
 
 		lSample := lengthSizeOfSampleNum + 1
@@ -106,13 +106,13 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			return err
 		}
 		sampleNumber := binary.BigEndian.Uint64(append(make([]byte, 8-lSample), bSample...))
-		entry = append(entry, &Field{"sample_number", sampleNumber, offset, 8 * uint64(lSample)})
+		entry = append(entry, &Field{"sample_number", sampleNumber, offset, 8 * uint64(lSample), 0})
 		offset += int64(lSample)
 
 		entries[i] = entry
 	}
 
-	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8})
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
 
 	return nil
 }

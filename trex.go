@@ -23,19 +23,19 @@ func (b *trexBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"default_sample_description_index", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"default_sample_description_index", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"default_sample_duration", binary.BigEndian.Uint32(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"default_sample_duration", binary.BigEndian.Uint32(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Read(b4); err != nil {
@@ -48,7 +48,7 @@ func (b *trexBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	b.fields = append(b.fields, &Field{"sample_has_redundancy", uint8(flags >> 20 & 0x03), offset + 1, 2, 2})
 	b.fields = append(b.fields, &Field{"sample_padding_value", uint8(flags >> 16 & 0x0E), offset + 2, 3, 4})
 	b.fields = append(b.fields, &Field{"sample_is_non_sync_sample", flags>>16&0x01 == 1, offset + 2, 1, 7})
-	b.fields = append(b.fields, &Field{"sample_degradation_priority", uint16(flags & 0xFFFF), offset + 3, 16})
+	b.fields = append(b.fields, &Field{"sample_degradation_priority", uint16(flags & 0xFFFF), offset + 3, 16, 0})
 
 	return nil
 }

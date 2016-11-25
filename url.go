@@ -18,7 +18,7 @@ func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	b.fields = fields
 
 	if size == 12 {
-		b.fields = append(b.fields, &Field{"location", "", offset, 0})
+		b.fields = append(b.fields, &Field{"location", "", offset, 0, 0})
 
 		return nil
 	}
@@ -29,7 +29,7 @@ func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(bLocation); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"location", string(bLocation), offset, lLocation * 8})
+	b.fields = append(b.fields, &Field{"location", string(bLocation), offset, lLocation * 8, 0})
 
 	return nil
 }

@@ -27,7 +27,7 @@ func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(b4); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"handler_type", string(b4), offset, 32})
+	b.fields = append(b.fields, &Field{"handler_type", string(b4), offset, 32, 0})
 	offset += 4
 
 	if _, err := r.Seek(12, io.SeekCurrent); err != nil {
@@ -40,7 +40,7 @@ func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	if _, err := r.Read(bName); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"name", string(bName), offset, lName * 8})
+	b.fields = append(b.fields, &Field{"name", string(bName), offset, lName * 8, 0})
 
 	return nil
 }
