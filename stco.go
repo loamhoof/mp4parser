@@ -27,6 +27,7 @@ func (b *stcoBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
 	offset += 4
 
+	entriesOffset := offset
 	entries := make([]Fields, entryCount)
 	for i := 0; uint32(i) < entryCount; i++ {
 		if _, err := r.Read(b4); err != nil {
@@ -35,7 +36,7 @@ func (b *stcoBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		entries[i] = Fields{{"chunk_offset", binary.BigEndian.Uint32(b4), offset, 32}}
 		offset += 4
 	}
-	b.fields = append(b.fields, &Field{"entries", entryCount, offset, 64 * uint64(entryCount)}) // TODO offset
+	b.fields = append(b.fields, &Field{"entries", entryCount, entriesOffset, uint64(offset-entriesOffset) * 8})
 
 	return nil
 }

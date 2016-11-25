@@ -5,10 +5,11 @@ import (
 )
 
 type Field struct {
-	Key    string
-	Value  interface{}
-	Offset int64
-	Bits   uint64
+	Key        string
+	Value      interface{}
+	Offset     int64
+	Bits       uint64
+	BitsOffset uint8
 }
 
 func (f *Field) String() string {

@@ -78,9 +78,9 @@ func (b *mdhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	}
 	n := binary.BigEndian.Uint16(b2)
 
-	b.fields = append(b.fields, &Field{"pad", n >> 15, offset, 1}) // TODO
+	b.fields = append(b.fields, &Field{"pad", n >> 15, offset, 1, 0})
 	language := fmt.Sprintf("%c%c%c", n>>10&0x1F+0x60, n>>5&0x1F+0x60, n&0x1F+0x60)
-	b.fields = append(b.fields, &Field{"language", language, offset, 15})
+	b.fields = append(b.fields, &Field{"language", language, offset, 15, 1})
 
 	return nil
 }

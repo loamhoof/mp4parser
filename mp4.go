@@ -12,10 +12,6 @@ type MP4 struct {
 }
 
 func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
-	if closer, ok := r.(io.Closer); ok {
-		defer closer.Close()
-	}
-
 	bytes := make([]byte, 4)
 
 	children := make([]Box, 0, 1)

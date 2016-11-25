@@ -37,11 +37,11 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		return err
 	}
 	lengthSizeOfTrafNum := b1[0] & 48
-	b.fields = append(b.fields, &Field{"length_size_of_traf_num", lengthSizeOfTrafNum, offset, 2})
+	b.fields = append(b.fields, &Field{"length_size_of_traf_num", lengthSizeOfTrafNum, offset, 2, 2})
 	lengthSizeOfTrunNum := b1[0] & 12
-	b.fields = append(b.fields, &Field{"length_size_of_trun_num", lengthSizeOfTrunNum, offset, 2}) // TODO
+	b.fields = append(b.fields, &Field{"length_size_of_trun_num", lengthSizeOfTrunNum, offset, 2, 4})
 	lengthSizeOfSampleNum := b1[0] & 3
-	b.fields = append(b.fields, &Field{"length_size_of_sample_num", lengthSizeOfSampleNum, offset, 2}) // TODO
+	b.fields = append(b.fields, &Field{"length_size_of_sample_num", lengthSizeOfSampleNum, offset, 2, 6})
 	offset += 1
 
 	if _, err := r.Read(b4); err != nil {
@@ -51,6 +51,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	b.fields = append(b.fields, &Field{"number_of_entry", numberOfEntry, offset, 32})
 	offset += 4
 
+	entriesOffset := offset
 	entries := make([]Fields, numberOfEntry)
 	for i := 0; uint32(i) < numberOfEntry; i++ {
 		entry := make(Fields, 0, 5)
@@ -111,7 +112,7 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		entries[i] = entry
 	}
 
-	b.fields = append(b.fields, &Field{"entries", entries, offset, 0}) // TODO
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8})
 
 	return nil
 }

@@ -35,6 +35,7 @@ func (b *stszBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	offset += 4
 
 	if sampleSize == 0 {
+		samplesOffset := offset
 		samples := make([]Fields, sampleCount)
 		for i := 0; uint32(i) < sampleCount; i++ {
 			if _, err := r.Read(b4); err != nil {
@@ -43,7 +44,7 @@ func (b *stszBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			samples[i] = Fields{{"entry_size", binary.BigEndian.Uint32(b4), offset, 32}}
 			offset += 4
 		}
-		b.fields = append(b.fields, &Field{"samples", samples, offset, 32 * uint64(sampleCount)}) // TODO offset
+		b.fields = append(b.fields, &Field{"samples", samples, samplesOffset, uint64(offset-samplesOffset) * 8})
 	}
 
 	return nil

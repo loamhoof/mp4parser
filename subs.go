@@ -29,6 +29,7 @@ func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
 	b.fields = append(b.fields, &Field{"entry_count", entryCount, offset, 32})
 	offset += 4
 
+	entriesOffset := offset
 	entries := make([]Fields, entryCount)
 	for i := 0; uint32(i) < entryCount; i++ {
 		entry := make(Fields, 0, 3)
@@ -46,6 +47,7 @@ func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		entry = append(entry, &Field{"subsample_count", subsampleCount, offset, 16})
 		offset += 2
 
+		subsamplesOffset := offset
 		subsamples := make([]Fields, subsampleCount)
 		for j := 0; uint16(j) < subsampleCount; j++ {
 			subsample := make(Fields, 0, subsampleCount)
@@ -84,11 +86,11 @@ func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			subsamples[j] = subsample
 		}
 
-		entry = append(entry, &Field{"subsamples", subsamples, offset, 0}) // TODO
+		entry = append(entry, &Field{"subsamples", subsamples, subsamplesOffset, uint64(offset-subsamplesOffset) * 8})
 
 		entries[i] = entry
 	}
-	b.fields = append(b.fields, &Field{"entries", entries, offset, 0}) // TODO
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8})
 
 	return nil
 }

@@ -48,6 +48,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 		offset += 4
 	}
 
+	samplesOffset := offset
 	samples := make([]Fields, sampleCount)
 	for i := 0; uint32(i) < sampleCount; i++ {
 		sample := make(Fields, 0, 4)
@@ -95,7 +96,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 		samples[i] = sample
 	}
-	b.fields = append(b.fields, &Field{"samples", samples, offset, 0}) //TODO
+	b.fields = append(b.fields, &Field{"samples", samples, samplesOffset, uint64(offset-samplesOffset) * 8})
 
 	return nil
 }
