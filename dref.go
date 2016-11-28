@@ -8,6 +8,8 @@ import (
 type drefBox struct {
 	baseBox
 	children []Box
+	url      []Box
+	urn      []Box
 }
 
 func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -39,6 +41,12 @@ func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			return err
 		}
 		b.children = append(b.children, box)
+
+		if _type[0:3] == "url" {
+			b.url = append(b.url, box)
+		} else if _type[0:3] == "urn" {
+			b.urn = append(b.urn, box)
+		}
 
 		offset += int64(size)
 	}

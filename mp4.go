@@ -9,6 +9,12 @@ import (
 
 type MP4 struct {
 	children []Box
+	Ftyp     Box
+	Free     Box
+	Moov     Box
+	Moof     []Box
+	Mdat     []Box
+	Mfra     Box
 }
 
 func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
@@ -38,6 +44,21 @@ func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
 			return err
 		}
 		children = append(children, box)
+
+		switch box.Type() {
+		case "ftyp":
+			m.Ftyp = box
+		case "free":
+			m.Free = box
+		case "moov":
+			m.Moov = box
+		case "moof":
+			m.Moof = append(m.Moof, box)
+		case "mdat":
+			m.Mdat = append(m.Mdat, box)
+		case "mfra":
+			m.Mfra = box
+		}
 
 		offset += int64(l)
 	}

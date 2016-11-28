@@ -86,3 +86,31 @@ func parseFullBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64
 
 	return
 }
+
+func parseContainerBox(r io.ReadSeeker, startOffset int64) (size uint64, _type string, fields Fields, children []Box, err error) {
+	var offset int64
+	size, offset, _type, fields, err = parseBox(r, startOffset)
+	if err != nil {
+		return
+	}
+
+	children = make([]Box, 0, 1)
+	for offset-startOffset < int64(size) {
+		var cSize uint64
+		var cType string
+		cSize, _, cType, _, err = parseBox(r, offset)
+		if err != nil {
+			return
+		}
+
+		box := newBox(cType)
+		if err = box.Parse(r, offset); err != nil {
+			return
+		}
+		children = append(children, box)
+
+		offset += int64(cSize)
+	}
+
+	return
+}
