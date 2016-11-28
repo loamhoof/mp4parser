@@ -6,8 +6,7 @@ import (
 )
 
 type drefBox struct {
-	size     uint64
-	fields   Fields
+	baseBox
 	children []Box
 }
 
@@ -51,18 +50,6 @@ func (b *drefBox) Type() string {
 	return "dref"
 }
 
-func (b *drefBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *drefBox) Size() uint64 {
-	return b.size
-}
-
 func (b *drefBox) Children() []Box {
 	return b.children
-}
-
-func (b *drefBox) Data() Fields {
-	return b.fields
 }

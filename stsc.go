@@ -6,8 +6,7 @@ import (
 )
 
 type stscBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *stscBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -60,20 +59,4 @@ func (b *stscBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *stscBox) Type() string {
 	return "stsc"
-}
-
-func (b *stscBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *stscBox) Size() uint64 {
-	return b.size
-}
-
-func (b *stscBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *stscBox) Data() Fields {
-	return b.fields
 }

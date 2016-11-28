@@ -7,8 +7,7 @@ import (
 )
 
 type cttsBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *cttsBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -66,20 +65,4 @@ func (b *cttsBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *cttsBox) Type() string {
 	return "ctts"
-}
-
-func (b *cttsBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *cttsBox) Size() uint64 {
-	return b.size
-}
-
-func (b *cttsBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *cttsBox) Data() Fields {
-	return b.fields
 }

@@ -5,8 +5,7 @@ import (
 )
 
 type urlBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -36,20 +35,4 @@ func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *urlBox) Type() string {
 	return "url"
-}
-
-func (b *urlBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *urlBox) Size() uint64 {
-	return b.size
-}
-
-func (b *urlBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *urlBox) Data() Fields {
-	return b.fields
 }

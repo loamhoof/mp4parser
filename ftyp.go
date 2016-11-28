@@ -6,8 +6,7 @@ import (
 )
 
 type ftypBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -47,20 +46,4 @@ func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *ftypBox) Type() string {
 	return "ftyp"
-}
-
-func (b *ftypBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *ftypBox) Size() uint64 {
-	return b.size
-}
-
-func (b *ftypBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *ftypBox) Data() Fields {
-	return b.fields
 }

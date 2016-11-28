@@ -5,9 +5,8 @@ import (
 )
 
 type freeBox struct {
-	size   uint64
-	_type  string
-	fields Fields
+	baseBox
+	_type string
 }
 
 func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -31,20 +30,4 @@ func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *freeBox) Type() string {
 	return b._type
-}
-
-func (b *freeBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *freeBox) Size() uint64 {
-	return b.size
-}
-
-func (b *freeBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *freeBox) Data() Fields {
-	return b.fields
 }

@@ -5,8 +5,7 @@ import (
 )
 
 type hdlrBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -47,20 +46,4 @@ func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *hdlrBox) Type() string {
 	return "hdlr"
-}
-
-func (b *hdlrBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *hdlrBox) Size() uint64 {
-	return b.size
-}
-
-func (b *hdlrBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *hdlrBox) Data() Fields {
-	return b.fields
 }

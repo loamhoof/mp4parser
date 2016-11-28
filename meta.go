@@ -5,8 +5,7 @@ import (
 )
 
 type metaBox struct {
-	size     uint64
-	fields   Fields
+	baseBox
 	children []Box
 }
 
@@ -41,18 +40,6 @@ func (b *metaBox) Type() string {
 	return "meta"
 }
 
-func (b *metaBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *metaBox) Size() uint64 {
-	return b.size
-}
-
 func (b *metaBox) Children() []Box {
 	return b.children
-}
-
-func (b *metaBox) Data() Fields {
-	return b.fields
 }

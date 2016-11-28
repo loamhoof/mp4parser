@@ -6,8 +6,7 @@ import (
 )
 
 type tfraBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -119,20 +118,4 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *tfraBox) Type() string {
 	return "tfra"
-}
-
-func (b *tfraBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *tfraBox) Size() uint64 {
-	return b.size
-}
-
-func (b *tfraBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *tfraBox) Data() Fields {
-	return b.fields
 }

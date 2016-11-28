@@ -6,8 +6,7 @@ import (
 )
 
 type subsBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -97,20 +96,4 @@ func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *subsBox) Type() string {
 	return "subs"
-}
-
-func (b *subsBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *subsBox) Size() uint64 {
-	return b.size
-}
-
-func (b *subsBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *subsBox) Data() Fields {
-	return b.fields
 }

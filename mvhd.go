@@ -6,8 +6,7 @@ import (
 )
 
 type mvhdBox struct {
-	size   uint64
-	fields Fields
+	baseBox
 }
 
 func (b *mvhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -114,20 +113,4 @@ func (b *mvhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *mvhdBox) Type() string {
 	return "mvhd"
-}
-
-func (b *mvhdBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *mvhdBox) Size() uint64 {
-	return b.size
-}
-
-func (b *mvhdBox) Children() []Box {
-	return []Box{}
-}
-
-func (b *mvhdBox) Data() Fields {
-	return b.fields
 }

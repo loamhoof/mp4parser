@@ -5,9 +5,8 @@ import (
 )
 
 type unknownBox struct {
-	_type  string
-	size   uint64
-	fields Fields
+	baseBox
+	_type string
 }
 
 func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64) error {
@@ -30,20 +29,4 @@ func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64) error {
 
 func (b *unknownBox) Type() string {
 	return "#" + b._type + "#"
-}
-
-func (b *unknownBox) Offset() int64 {
-	return b.fields[0].Offset
-}
-
-func (b *unknownBox) Size() uint64 {
-	return b.size
-}
-
-func (b *unknownBox) Children() []Box {
-	return nil
-}
-
-func (b *unknownBox) Data() Fields {
-	return b.fields
 }

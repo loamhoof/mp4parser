@@ -75,3 +75,24 @@ func newBox(_type string) Box {
 		return &metaBox{}
 	}
 }
+
+type baseBox struct {
+	size   uint64
+	fields Fields
+}
+
+func (b *baseBox) Offset() int64 {
+	return b.fields[0].Offset
+}
+
+func (b *baseBox) Size() uint64 {
+	return b.size
+}
+
+func (b *baseBox) Children() []Box {
+	return []Box{}
+}
+
+func (b *baseBox) Data() Fields {
+	return b.fields
+}
