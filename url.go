@@ -8,7 +8,7 @@ type urlBox struct {
 	baseBox
 }
 
-func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err

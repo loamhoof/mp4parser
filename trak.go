@@ -11,8 +11,8 @@ type trakBox struct {
 	Mdia     *mdiaBox
 }
 
-func (b *trakBox) Parse(r io.ReadSeeker, startOffset int64) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset)
+func (b *trakBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
 	if err != nil {
 		return err
 	}

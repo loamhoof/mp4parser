@@ -5,10 +5,18 @@ import (
 	"io"
 )
 
+type ParsePlan map[string]ParsePlan
+
 func Parse(r io.ReadSeeker) (*MP4, error) {
 	mp4 := &MP4{}
 
-	return mp4, mp4.Parse(r, 0)
+	return mp4, mp4.Parse(r, 0, nil)
+}
+
+func ParseOnly(r io.ReadSeeker, pp ParsePlan) (*MP4, error) {
+	mp4 := &MP4{}
+
+	return mp4, mp4.Parse(r, 0, pp)
 }
 
 func Replace(w io.ReadWriteSeeker, f *Field, v interface{}) error {

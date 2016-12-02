@@ -5,7 +5,7 @@ import (
 )
 
 type Box interface {
-	Parse(r io.ReadSeeker, offset int64) error
+	Parse(r io.ReadSeeker, offset int64, pp ParsePlan) error
 	Type() string
 	Offset() int64
 	Size() uint64

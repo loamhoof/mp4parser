@@ -17,7 +17,7 @@ type MP4 struct {
 	Mfra     *mfraBox
 }
 
-func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
+func (m *MP4) Parse(r io.ReadSeeker, offset int64, pp ParsePlan) error {
 	bytes := make([]byte, 4)
 
 	children := make([]Box, 0, 1)
@@ -39,26 +39,28 @@ func (m *MP4) Parse(r io.ReadSeeker, offset int64) error {
 		}
 		boxType := string(bytes)
 
-		box := newBox(boxType)
-		if err := box.Parse(r, offset); err != nil {
-			return err
-		}
-		children = append(children, box)
+		if _, ok := pp[boxType]; ok || pp == nil {
+			box := newBox(boxType)
+			if err := box.Parse(r, offset, pp[boxType]); err != nil {
+				return err
+			}
+			children = append(children, box)
 
-		switch box := box.(type) {
-		case *ftypBox:
-			m.Ftyp = box
-		case *freeBox:
-			m.Free = box
-		case *moovBox:
-			m.Moov = box
-		case *moofBox:
-			m.Moof = append(m.Moof, box)
-		case *mdatBox:
-			m.Mdat = append(m.Mdat, box)
-		case *mfraBox:
-			m.Mfra = box
-		default:
+			switch box := box.(type) {
+			case *ftypBox:
+				m.Ftyp = box
+			case *freeBox:
+				m.Free = box
+			case *moovBox:
+				m.Moov = box
+			case *moofBox:
+				m.Moof = append(m.Moof, box)
+			case *mdatBox:
+				m.Mdat = append(m.Mdat, box)
+			case *mfraBox:
+				m.Mfra = box
+			default:
+			}
 		}
 
 		offset += int64(l)

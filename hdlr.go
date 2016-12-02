@@ -8,7 +8,7 @@ type hdlrBox struct {
 	baseBox
 }
 
-func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err

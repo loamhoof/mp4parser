@@ -9,7 +9,7 @@ type freeBox struct {
 	_type string
 }
 
-func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _type, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err

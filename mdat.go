@@ -8,7 +8,7 @@ type mdatBox struct {
 	baseBox
 }
 
-func (b *mdatBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *mdatBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, _, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err

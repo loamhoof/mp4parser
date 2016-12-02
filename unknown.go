@@ -9,7 +9,7 @@ type unknownBox struct {
 	_type string
 }
 
-func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err

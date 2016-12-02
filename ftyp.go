@@ -9,7 +9,7 @@ type ftypBox struct {
 	baseBox
 }
 
-func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err

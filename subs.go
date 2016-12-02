@@ -9,7 +9,7 @@ type subsBox struct {
 	baseBox
 }
 
-func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err

@@ -9,7 +9,7 @@ type metaBox struct {
 	children []Box
 }
 
-func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -24,11 +24,13 @@ func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64) error {
 			return err
 		}
 
-		box := newBox(_type)
-		if err := box.Parse(r, offset); err != nil {
-			return err
+		if _, ok := pp[_type]; ok || pp == nil {
+			box := newBox(_type)
+			if err := box.Parse(r, offset, pp[_type]); err != nil {
+				return err
+			}
+			b.children = append(b.children, box)
 		}
-		b.children = append(b.children, box)
 
 		offset += int64(size)
 	}

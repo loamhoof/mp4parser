@@ -9,7 +9,7 @@ type tfhdBox struct {
 	baseBox
 }
 
-func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64) error {
+func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	size, offset, _, _, flags, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
