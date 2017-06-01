@@ -9,15 +9,15 @@ import (
 
 type MP4 struct {
 	children []Box
-	Ftyp     *ftypBox
-	Free     *freeBox
-	Moov     *moovBox
-	Moof     []*moofBox
-	Mdat     []*mdatBox
-	Mfra     *mfraBox
+	Ftyp     *FtypBox
+	Free     *FreeBox
+	Moov     *MoovBox
+	Moof     []*MoofBox
+	Mdat     []*MdatBox
+	Mfra     *MfraBox
 }
 
-func (m *MP4) Parse(r io.ReadSeeker, offset int64, pp ParsePlan) error {
+func (m *MP4) Parse(r io.ReadSeeker, offset int64, pp ParsePlan, pc ParseContext) error {
 	bytes := make([]byte, 4)
 
 	children := make([]Box, 0, 1)
@@ -41,23 +41,23 @@ func (m *MP4) Parse(r io.ReadSeeker, offset int64, pp ParsePlan) error {
 
 		if _, ok := pp[boxType]; ok || pp == nil {
 			box := newBox(boxType)
-			if err := box.Parse(r, offset, pp[boxType]); err != nil {
+			if err := box.Parse(r, offset, pp[boxType], pc); err != nil {
 				return err
 			}
 			children = append(children, box)
 
 			switch box := box.(type) {
-			case *ftypBox:
+			case *FtypBox:
 				m.Ftyp = box
-			case *freeBox:
+			case *FreeBox:
 				m.Free = box
-			case *moovBox:
+			case *MoovBox:
 				m.Moov = box
-			case *moofBox:
+			case *MoofBox:
 				m.Moof = append(m.Moof, box)
-			case *mdatBox:
+			case *MdatBox:
 				m.Mdat = append(m.Mdat, box)
-			case *mfraBox:
+			case *MfraBox:
 				m.Mfra = box
 			default:
 			}

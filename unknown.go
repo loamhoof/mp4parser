@@ -4,12 +4,12 @@ import (
 	"io"
 )
 
-type unknownBox struct {
+type UnknownBox struct {
 	baseBox
 	_type string
 }
 
-func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *UnknownBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err
@@ -22,11 +22,11 @@ func (b *unknownBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) err
 	if _, err := r.Read(bData); err != nil {
 		return err
 	}
-	b.fields = append(b.fields, &Field{"unknown", string(bData), offset, lData * 8, 0})
+	b.fields = append(b.fields, &Field{"unknown", bData, offset, lData * 8, 0})
 
 	return nil
 }
 
-func (b *unknownBox) Type() string {
+func (b *UnknownBox) Type() string {
 	return "#" + b._type + "#"
 }

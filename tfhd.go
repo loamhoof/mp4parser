@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type tfhdBox struct {
+type TfhdBox struct {
 	baseBox
 }
 
-func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *TfhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, flags, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -69,6 +69,6 @@ func (b *tfhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *tfhdBox) Type() string {
+func (b *TfhdBox) Type() string {
 	return "tfhd"
 }

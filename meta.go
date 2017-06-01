@@ -4,12 +4,12 @@ import (
 	"io"
 )
 
-type metaBox struct {
+type MetaBox struct {
 	baseBox
 	children []Box
 }
 
-func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *MetaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 		if _, ok := pp[_type]; ok || pp == nil {
 			box := newBox(_type)
-			if err := box.Parse(r, offset, pp[_type]); err != nil {
+			if err := box.Parse(r, offset, pp[_type], pc); err != nil {
 				return err
 			}
 			b.children = append(b.children, box)
@@ -38,10 +38,10 @@ func (b *metaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *metaBox) Type() string {
+func (b *MetaBox) Type() string {
 	return "meta"
 }
 
-func (b *metaBox) Children() []Box {
+func (b *MetaBox) Children() []Box {
 	return b.children
 }

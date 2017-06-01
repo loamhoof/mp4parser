@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type mvhdBox struct {
+type MvhdBox struct {
 	baseBox
 }
 
-func (b *mvhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *MvhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -111,6 +111,6 @@ func (b *mvhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mvhdBox) Type() string {
+func (b *MvhdBox) Type() string {
 	return "mvhd"
 }

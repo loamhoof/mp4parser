@@ -4,15 +4,15 @@ import (
 	"io"
 )
 
-type mvexBox struct {
+type MvexBox struct {
 	baseBox
 	children []Box
-	Mehd     *mehdBox
-	Trex     *trexBox
+	Mehd     *MehdBox
+	Trex     *TrexBox
 }
 
-func (b *mvexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MvexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,9 +22,9 @@ func (b *mvexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *mehdBox:
+		case *MehdBox:
 			b.Mehd = child
-		case *trexBox:
+		case *TrexBox:
 			b.Trex = child
 		default:
 		}
@@ -33,10 +33,10 @@ func (b *mvexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mvexBox) Type() string {
+func (b *MvexBox) Type() string {
 	return "mvex"
 }
 
-func (b *mvexBox) Children() []Box {
+func (b *MvexBox) Children() []Box {
 	return b.children
 }

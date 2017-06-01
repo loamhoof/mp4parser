@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type mehdBox struct {
+type MehdBox struct {
 	baseBox
 }
 
-func (b *mehdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *MehdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -35,6 +35,6 @@ func (b *mehdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mehdBox) Type() string {
+func (b *MehdBox) Type() string {
 	return "mehd"
 }

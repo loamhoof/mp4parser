@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type subsBox struct {
+type SubsBox struct {
 	baseBox
 }
 
-func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *SubsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -94,6 +94,6 @@ func (b *subsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *subsBox) Type() string {
+func (b *SubsBox) Type() string {
 	return "subs"
 }

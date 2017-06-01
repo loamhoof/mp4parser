@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type tfraBox struct {
+type TfraBox struct {
 	baseBox
 }
 
-func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *TfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -116,6 +116,6 @@ func (b *tfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *tfraBox) Type() string {
+func (b *TfraBox) Type() string {
 	return "tfra"
 }

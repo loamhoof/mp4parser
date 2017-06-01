@@ -17,3 +17,13 @@ func (f *Field) String() string {
 }
 
 type Fields []*Field
+
+func (fields Fields) Get(key string) *Field {
+	for _, f := range fields {
+		if f.Key == key {
+			return f
+		}
+	}
+
+	return nil
+}

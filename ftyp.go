@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type ftypBox struct {
+type FtypBox struct {
 	baseBox
 }
 
-func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *FtypBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err
@@ -44,6 +44,6 @@ func (b *ftypBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *ftypBox) Type() string {
+func (b *FtypBox) Type() string {
 	return "ftyp"
 }

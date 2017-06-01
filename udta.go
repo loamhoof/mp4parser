@@ -4,14 +4,14 @@ import (
 	"io"
 )
 
-type udtaBox struct {
+type UdtaBox struct {
 	baseBox
 	children []Box
-	Meta     *metaBox
+	Meta     *MetaBox
 }
 
-func (b *udtaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *UdtaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (b *udtaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *metaBox:
+		case *MetaBox:
 			b.Meta = child
 		default:
 		}
@@ -30,10 +30,10 @@ func (b *udtaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *udtaBox) Type() string {
+func (b *UdtaBox) Type() string {
 	return "udta"
 }
 
-func (b *udtaBox) Children() []Box {
+func (b *UdtaBox) Children() []Box {
 	return b.children
 }

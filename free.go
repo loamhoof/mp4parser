@@ -4,12 +4,12 @@ import (
 	"io"
 )
 
-type freeBox struct {
+type FreeBox struct {
 	baseBox
 	_type string
 }
 
-func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *FreeBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _type, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err
@@ -28,6 +28,6 @@ func (b *freeBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *freeBox) Type() string {
+func (b *FreeBox) Type() string {
 	return b._type
 }

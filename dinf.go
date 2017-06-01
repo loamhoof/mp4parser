@@ -4,14 +4,14 @@ import (
 	"io"
 )
 
-type dinfBox struct {
+type DinfBox struct {
 	baseBox
 	children []Box
-	Dref     *drefBox
+	Dref     *DrefBox
 }
 
-func (b *dinfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *DinfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (b *dinfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *drefBox:
+		case *DrefBox:
 			b.Dref = child
 		default:
 		}
@@ -30,10 +30,10 @@ func (b *dinfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *dinfBox) Type() string {
+func (b *DinfBox) Type() string {
 	return "dinf"
 }
 
-func (b *dinfBox) Children() []Box {
+func (b *DinfBox) Children() []Box {
 	return b.children
 }

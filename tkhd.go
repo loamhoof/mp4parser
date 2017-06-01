@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type tkhdBox struct {
+type TkhdBox struct {
 	baseBox
 }
 
-func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *TkhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32, 0})
+		b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Seek(4, io.SeekCurrent); err != nil {
@@ -66,7 +66,7 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 		if _, err := r.Read(b4); err != nil {
 			return err
 		}
-		b.fields = append(b.fields, &Field{"timescale", binary.BigEndian.Uint32(b4), offset, 32, 0})
+		b.fields = append(b.fields, &Field{"track_ID", binary.BigEndian.Uint32(b4), offset, 32, 0})
 		offset += 4
 
 		if _, err := r.Seek(4, io.SeekCurrent); err != nil {
@@ -134,6 +134,6 @@ func (b *tkhdBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *tkhdBox) Type() string {
+func (b *TkhdBox) Type() string {
 	return "tkhd"
 }

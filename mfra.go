@@ -4,15 +4,15 @@ import (
 	"io"
 )
 
-type mfraBox struct {
+type MfraBox struct {
 	baseBox
 	children []Box
-	Tfra     *tfraBox
-	Mfro     *mfroBox
+	Tfra     *TfraBox
+	Mfro     *MfroBox
 }
 
-func (b *mfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,9 +22,9 @@ func (b *mfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *tfraBox:
+		case *TfraBox:
 			b.Tfra = child
-		case *mfroBox:
+		case *MfroBox:
 			b.Mfro = child
 		default:
 		}
@@ -33,10 +33,10 @@ func (b *mfraBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mfraBox) Type() string {
+func (b *MfraBox) Type() string {
 	return "mfra"
 }
 
-func (b *mfraBox) Children() []Box {
+func (b *MfraBox) Children() []Box {
 	return b.children
 }

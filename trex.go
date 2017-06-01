@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type trexBox struct {
+type TrexBox struct {
 	baseBox
 }
 
-func (b *trexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *TrexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -51,6 +51,6 @@ func (b *trexBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *trexBox) Type() string {
+func (b *TrexBox) Type() string {
 	return "trex"
 }

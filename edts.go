@@ -4,14 +4,14 @@ import (
 	"io"
 )
 
-type edtsBox struct {
+type EdtsBox struct {
 	baseBox
 	children []Box
-	Elst     *elstBox
+	Elst     *ElstBox
 }
 
-func (b *edtsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *EdtsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (b *edtsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *elstBox:
+		case *ElstBox:
 			b.Elst = child
 		default:
 		}
@@ -30,10 +30,10 @@ func (b *edtsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *edtsBox) Type() string {
+func (b *EdtsBox) Type() string {
 	return "edts"
 }
 
-func (b *edtsBox) Children() []Box {
+func (b *EdtsBox) Children() []Box {
 	return b.children
 }

@@ -4,15 +4,15 @@ import (
 	"io"
 )
 
-type trakBox struct {
+type TrakBox struct {
 	baseBox
 	children []Box
-	Tkhd     *tkhdBox
-	Mdia     *mdiaBox
+	Tkhd     *TkhdBox
+	Mdia     *MdiaBox
 }
 
-func (b *trakBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *TrakBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,9 +22,9 @@ func (b *trakBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *tkhdBox:
+		case *TkhdBox:
 			b.Tkhd = child
-		case *mdiaBox:
+		case *MdiaBox:
 			b.Mdia = child
 		default:
 		}
@@ -33,10 +33,10 @@ func (b *trakBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *trakBox) Type() string {
+func (b *TrakBox) Type() string {
 	return "trak"
 }
 
-func (b *trakBox) Children() []Box {
+func (b *TrakBox) Children() []Box {
 	return b.children
 }

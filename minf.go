@@ -4,15 +4,16 @@ import (
 	"io"
 )
 
-type minfBox struct {
+type MinfBox struct {
 	baseBox
 	children []Box
-	Vmhd     *vmhdBox
-	Dinf     *dinfBox
+	Vmhd     *VmhdBox
+	Dinf     *DinfBox
+	Stbl     *StblBox
 }
 
-func (b *minfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MinfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,10 +23,12 @@ func (b *minfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *vmhdBox:
+		case *VmhdBox:
 			b.Vmhd = child
-		case *dinfBox:
+		case *DinfBox:
 			b.Dinf = child
+		case *StblBox:
+			b.Stbl = child
 		default:
 		}
 	}
@@ -33,10 +36,10 @@ func (b *minfBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *minfBox) Type() string {
+func (b *MinfBox) Type() string {
 	return "minf"
 }
 
-func (b *minfBox) Children() []Box {
+func (b *MinfBox) Children() []Box {
 	return b.children
 }

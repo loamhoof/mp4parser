@@ -10,12 +10,8 @@ func parseBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64, _t
 		return
 	}
 
+	offset = startOffset
 	fields = make(Fields, 0, 4)
-
-	offset, err = r.Seek(0, io.SeekCurrent)
-	if err != nil {
-		return
-	}
 
 	b4 := make([]byte, 4)
 	b8 := make([]byte, 8)
@@ -87,7 +83,7 @@ func parseFullBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64
 	return
 }
 
-func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan) (size uint64, _type string, fields Fields, children []Box, err error) {
+func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) (size uint64, _type string, fields Fields, children []Box, err error) {
 	var offset int64
 	size, offset, _type, fields, err = parseBox(r, startOffset)
 	if err != nil {
@@ -105,7 +101,7 @@ func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan) (size u
 
 		if _, ok := pp[cType]; ok || pp == nil {
 			box := newBox(cType)
-			if err = box.Parse(r, offset, pp[cType]); err != nil {
+			if err = box.Parse(r, offset, pp[cType], pc); err != nil {
 				return
 			}
 			children = append(children, box)

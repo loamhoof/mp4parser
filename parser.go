@@ -7,16 +7,50 @@ import (
 
 type ParsePlan map[string]ParsePlan
 
+type ParseContext map[string]string
+
 func Parse(r io.ReadSeeker) (*MP4, error) {
 	mp4 := &MP4{}
 
-	return mp4, mp4.Parse(r, 0, nil)
+	return mp4, mp4.Parse(r, 0, nil, Background())
 }
 
 func ParseOnly(r io.ReadSeeker, pp ParsePlan) (*MP4, error) {
 	mp4 := &MP4{}
 
-	return mp4, mp4.Parse(r, 0, pp)
+	return mp4, mp4.Parse(r, 0, pp, Background())
+}
+
+func Find(r io.ReadSeeker, boxType string) (Box, error) {
+	b4 := make([]byte, 4)
+	b1 := make([]byte, 1)
+
+	if _, err := r.Read(b4); err != nil {
+		return nil, err
+	}
+
+	for {
+		if string(b4) == boxType {
+			box := newBox(boxType)
+
+			offset, err := r.Seek(-8, io.SeekCurrent)
+			if err != nil {
+				return nil, err
+			}
+
+			if err := box.Parse(r, offset, nil, Background()); err != nil {
+				return nil, err
+			}
+
+			return box, nil
+		}
+
+		if _, err := r.Read(b1); err != nil {
+			return nil, err
+		}
+
+		b4 = append(b4[1:], b1...)
+	}
 }
 
 func Replace(w io.ReadWriteSeeker, f *Field, v interface{}) error {
@@ -88,16 +122,16 @@ func Replace(w io.ReadWriteSeeker, f *Field, v interface{}) error {
 	wbl := int((f.Bits + 7) / 8)
 	wb = wb[len(wb)-wbl : len(wb)]
 
+	if _, err := w.Seek(f.Offset, io.SeekStart); err != nil {
+		return err
+	}
+
 	if f.BitsOffset == 0 && f.Bits%8 == 0 {
 		if _, err := w.Write(wb); err != nil {
 			return err
 		}
 
 		return nil
-	}
-
-	if _, err := w.Seek(f.Offset, io.SeekStart); err != nil {
-		return err
 	}
 
 	nBits := uint64(f.BitsOffset) + f.Bits

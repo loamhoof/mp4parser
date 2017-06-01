@@ -4,11 +4,11 @@ import (
 	"io"
 )
 
-type mdatBox struct {
+type MdatBox struct {
 	baseBox
 }
 
-func (b *mdatBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *MdatBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, _, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err
@@ -19,6 +19,6 @@ func (b *mdatBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mdatBox) Type() string {
+func (b *MdatBox) Type() string {
 	return "mdat"
 }

@@ -4,16 +4,16 @@ import (
 	"io"
 )
 
-type moovBox struct {
+type MoovBox struct {
 	baseBox
 	children []Box
-	Mvhd     *mvhdBox
-	Trak     *trakBox
-	Mvex     *mvexBox
+	Mvhd     *MvhdBox
+	Trak     *TrakBox
+	Mvex     *MvexBox
 }
 
-func (b *moovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MoovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -23,11 +23,11 @@ func (b *moovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *mvhdBox:
+		case *MvhdBox:
 			b.Mvhd = child
-		case *trakBox:
+		case *TrakBox:
 			b.Trak = child
-		case *mvexBox:
+		case *MvexBox:
 			b.Mvex = child
 		default:
 		}
@@ -36,10 +36,10 @@ func (b *moovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *moovBox) Type() string {
+func (b *MoovBox) Type() string {
 	return "moov"
 }
 
-func (b *moovBox) Children() []Box {
+func (b *MoovBox) Children() []Box {
 	return b.children
 }

@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type elstBox struct {
+type ElstBox struct {
 	baseBox
 }
 
-func (b *elstBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *ElstBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -78,6 +78,6 @@ func (b *elstBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *elstBox) Type() string {
+func (b *ElstBox) Type() string {
 	return "elst"
 }

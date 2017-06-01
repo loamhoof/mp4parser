@@ -6,11 +6,11 @@ import (
 	"io"
 )
 
-type trunBox struct {
+type TrunBox struct {
 	baseBox
 }
 
-func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *TrunBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, flags, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 		}
 		dataOffset, read := binary.Varint(b4)
 		if read <= 0 {
-			return errors.New("")
+			return errors.New("TODO")
 		}
 		b.fields = append(b.fields, &Field{"data_offset", dataOffset, offset, 32, 0})
 		offset += 4
@@ -86,7 +86,7 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 			} else {
 				sampleCompositionTimeOffset, read := binary.Varint(b4)
 				if read <= 0 {
-					return errors.New("")
+					return errors.New("TODO")
 				}
 				sample = append(sample, &Field{"sample_composition_time_offset", sampleCompositionTimeOffset, offset, 32, 0})
 				offset += 4
@@ -100,6 +100,6 @@ func (b *trunBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *trunBox) Type() string {
+func (b *TrunBox) Type() string {
 	return "trun"
 }

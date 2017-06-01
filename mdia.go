@@ -4,16 +4,16 @@ import (
 	"io"
 )
 
-type mdiaBox struct {
+type MdiaBox struct {
 	baseBox
 	children []Box
-	Mdhd     *mdhdBox
-	Hdlr     *hdlrBox
-	Minf     *minfBox
+	Mdhd     *MdhdBox
+	Hdlr     *HdlrBox
+	Minf     *MinfBox
 }
 
-func (b *mdiaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MdiaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -23,11 +23,11 @@ func (b *mdiaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *mdhdBox:
+		case *MdhdBox:
 			b.Mdhd = child
-		case *hdlrBox:
+		case *HdlrBox:
 			b.Hdlr = child
-		case *minfBox:
+		case *MinfBox:
 			b.Minf = child
 		default:
 		}
@@ -36,10 +36,10 @@ func (b *mdiaBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *mdiaBox) Type() string {
+func (b *MdiaBox) Type() string {
 	return "mdia"
 }
 
-func (b *mdiaBox) Children() []Box {
+func (b *MdiaBox) Children() []Box {
 	return b.children
 }

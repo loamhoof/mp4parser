@@ -4,15 +4,15 @@ import (
 	"io"
 )
 
-type trafBox struct {
+type TrafBox struct {
 	baseBox
 	children []Box
-	Tfhd     *tfhdBox
-	Trun     *trunBox
+	Tfhd     *TfhdBox
+	Trun     *TrunBox
 }
 
-func (b *trafBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *TrafBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,9 +22,9 @@ func (b *trafBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *tfhdBox:
+		case *TfhdBox:
 			b.Tfhd = child
-		case *trunBox:
+		case *TrunBox:
 			b.Trun = child
 		default:
 		}
@@ -33,10 +33,10 @@ func (b *trafBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *trafBox) Type() string {
+func (b *TrafBox) Type() string {
 	return "traf"
 }
 
-func (b *trafBox) Children() []Box {
+func (b *TrafBox) Children() []Box {
 	return b.children
 }

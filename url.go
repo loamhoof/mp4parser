@@ -4,11 +4,11 @@ import (
 	"io"
 )
 
-type urlBox struct {
+type UrlBox struct {
 	baseBox
 }
 
-func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *UrlBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, fields, err := parseBox(r, startOffset)
 	if err != nil {
 		return err
@@ -33,6 +33,6 @@ func (b *urlBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
 	return nil
 }
 
-func (b *urlBox) Type() string {
+func (b *UrlBox) Type() string {
 	return "url"
 }

@@ -4,15 +4,15 @@ import (
 	"io"
 )
 
-type moofBox struct {
+type MoofBox struct {
 	baseBox
 	children []Box
-	Mfhd     *mfhdBox
-	Traf     *trafBox
+	Mfhd     *MfhdBox
+	Traf     *TrafBox
 }
 
-func (b *moofBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *MoofBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -22,9 +22,9 @@ func (b *moofBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *mfhdBox:
+		case *MfhdBox:
 			b.Mfhd = child
-		case *trafBox:
+		case *TrafBox:
 			b.Traf = child
 		default:
 		}
@@ -33,10 +33,10 @@ func (b *moofBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *moofBox) Type() string {
+func (b *MoofBox) Type() string {
 	return "moof"
 }
 
-func (b *moofBox) Children() []Box {
+func (b *MoofBox) Children() []Box {
 	return b.children
 }

@@ -4,17 +4,18 @@ import (
 	"io"
 )
 
-type stblBox struct {
+type StblBox struct {
 	baseBox
 	children []Box
-	Stts     *sttsBox
-	Stsc     *stscBox
-	Stsz     *stszBox
-	Stco     *stcoBox
+	Stts     *SttsBox
+	Stsc     *StscBox
+	Stsz     *StszBox
+	Stco     *StcoBox
+	Stsd     *StsdBox
 }
 
-func (b *stblBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
-	size, _, fields, children, err := parseContainerBox(r, startOffset, pp)
+func (b *StblBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
+	size, _, fields, children, err := parseContainerBox(r, startOffset, pp, pc)
 	if err != nil {
 		return err
 	}
@@ -24,14 +25,16 @@ func (b *stblBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 	for _, child := range children {
 		switch child := child.(type) {
-		case *sttsBox:
+		case *SttsBox:
 			b.Stts = child
-		case *stscBox:
+		case *StscBox:
 			b.Stsc = child
-		case *stszBox:
+		case *StszBox:
 			b.Stsz = child
-		case *stcoBox:
+		case *StcoBox:
 			b.Stco = child
+		case *StsdBox:
+			b.Stsd = child
 		default:
 		}
 	}
@@ -39,10 +42,10 @@ func (b *stblBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *stblBox) Type() string {
+func (b *StblBox) Type() string {
 	return "stbl"
 }
 
-func (b *stblBox) Children() []Box {
+func (b *StblBox) Children() []Box {
 	return b.children
 }

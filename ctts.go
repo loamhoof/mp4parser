@@ -6,11 +6,11 @@ import (
 	"io"
 )
 
-type cttsBox struct {
+type CttsBox struct {
 	baseBox
 }
 
-func (b *cttsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *CttsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, version, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (b *cttsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 			}
 			sampleOffset, read := binary.Varint(b4)
 			if read <= 0 {
-				return errors.New("")
+				return errors.New("TODO")
 			}
 			entry = append(entry, &Field{"sample_offset", sampleOffset, offset, 32, 0})
 			offset += 4
@@ -63,6 +63,6 @@ func (b *cttsBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *cttsBox) Type() string {
+func (b *CttsBox) Type() string {
 	return "ctts"
 }

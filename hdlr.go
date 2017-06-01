@@ -4,11 +4,11 @@ import (
 	"io"
 )
 
-type hdlrBox struct {
+type HdlrBox struct {
 	baseBox
 }
 
-func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *HdlrBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -29,6 +29,9 @@ func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	b.fields = append(b.fields, &Field{"handler_type", string(b4), offset, 32, 0})
 	offset += 4
 
+	// Parsing the stsd box requires the handler_type
+	pc["handler_type"] = string(b4)
+
 	if _, err := r.Seek(12, io.SeekCurrent); err != nil {
 		return err
 	}
@@ -44,6 +47,6 @@ func (b *hdlrBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *hdlrBox) Type() string {
+func (b *HdlrBox) Type() string {
 	return "hdlr"
 }

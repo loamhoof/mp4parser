@@ -5,14 +5,14 @@ import (
 	"io"
 )
 
-type drefBox struct {
+type DrefBox struct {
 	baseBox
 	children []Box
-	url      []Box
-	urn      []Box
+	Url      []*UrlBox
+	// Urn      []Box
 }
 
-func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *DrefBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -39,15 +39,17 @@ func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 
 		if _, ok := pp[_type]; ok || pp == nil {
 			box := newBox(_type)
-			if err := box.Parse(r, offset, pp[_type]); err != nil {
+			if err := box.Parse(r, offset, pp[_type], pc); err != nil {
 				return err
 			}
 			b.children = append(b.children, box)
 
-			if _type == "url" {
-				b.url = append(b.url, box)
-			} else if _type == "urn" {
-				b.urn = append(b.urn, box)
+			switch box := box.(type) {
+			case *UrlBox:
+				b.Url = append(b.Url, box)
+				// case *UrnBox:
+				// 	b.Urn = append(b.Urn, box)
+			default:
 			}
 		}
 
@@ -57,10 +59,10 @@ func (b *drefBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *drefBox) Type() string {
+func (b *DrefBox) Type() string {
 	return "dref"
 }
 
-func (b *drefBox) Children() []Box {
+func (b *DrefBox) Children() []Box {
 	return b.children
 }

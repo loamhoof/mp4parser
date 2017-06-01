@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
-type stssBox struct {
+type StssBox struct {
 	baseBox
 }
 
-func (b *stssBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error {
+func (b *StssBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
 	size, offset, _, _, _, fields, err := parseFullBox(r, startOffset)
 	if err != nil {
 		return err
@@ -40,6 +40,6 @@ func (b *stssBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan) error 
 	return nil
 }
 
-func (b *stssBox) Type() string {
+func (b *StssBox) Type() string {
 	return "stss"
 }

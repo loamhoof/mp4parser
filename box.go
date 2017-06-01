@@ -5,7 +5,7 @@ import (
 )
 
 type Box interface {
-	Parse(r io.ReadSeeker, offset int64, pp ParsePlan) error
+	Parse(r io.ReadSeeker, offset int64, pp ParsePlan, pc ParseContext) error
 	Type() string
 	Offset() int64
 	Size() uint64
@@ -13,88 +13,104 @@ type Box interface {
 	Data() Fields
 }
 
+func Background() ParseContext {
+	return make(ParseContext)
+}
+
 func newBox(_type string) Box {
 	switch _type {
 	default:
-		return &unknownBox{_type: _type}
+		return &UnknownBox{_type: _type}
 	case "ftyp":
-		return &ftypBox{}
+		return &FtypBox{}
 	case "free", "skip":
-		return &freeBox{}
+		return &FreeBox{}
 	case "moov":
-		return &moovBox{}
+		return &MoovBox{}
 	case "trak":
-		return &trakBox{}
+		return &TrakBox{}
 	case "mvhd":
-		return &mvhdBox{}
+		return &MvhdBox{}
 	case "tkhd":
-		return &tkhdBox{}
+		return &TkhdBox{}
 	case "edts":
-		return &edtsBox{}
+		return &EdtsBox{}
 	case "elst":
-		return &elstBox{}
+		return &ElstBox{}
 	case "mdia":
-		return &mdiaBox{}
+		return &MdiaBox{}
 	case "mdhd":
-		return &mdhdBox{}
+		return &MdhdBox{}
 	case "hdlr":
-		return &hdlrBox{}
+		return &HdlrBox{}
 	case "minf":
-		return &minfBox{}
+		return &MinfBox{}
 	case "smhd":
-		return &smhdBox{}
+		return &SmhdBox{}
 	case "vmhd":
-		return &vmhdBox{}
+		return &VmhdBox{}
 	case "dinf":
-		return &dinfBox{}
+		return &DinfBox{}
 	case "dref":
-		return &drefBox{}
+		return &DrefBox{}
 	case "url":
-		return &urlBox{}
+		return &UrlBox{}
 	case "stbl":
-		return &stblBox{}
+		return &StblBox{}
+	case "stsd":
+		return &StsdBox{}
+	case "vide_se":
+		return &VisualSampleEntry{}
+	case "avcC":
+		return &AvcCBox{}
+	case "btrt":
+		return &BtrtBox{}
+	case "clap":
+		return &ClapBox{}
+	case "pasp":
+		return &PaspBox{}
 	case "stts":
-		return &sttsBox{}
+		return &SttsBox{}
 	case "stss":
-		return &stssBox{}
+		return &StssBox{}
 	case "ctts":
-		return &cttsBox{}
+		return &CttsBox{}
 	case "stsc":
-		return &stscBox{}
+		return &StscBox{}
 	case "stsz":
-		return &stszBox{}
+		return &StszBox{}
 	case "stco":
-		return &stcoBox{}
+		return &StcoBox{}
 	case "mvex":
-		return &mvexBox{}
+		return &MvexBox{}
 	case "mehd":
-		return &mehdBox{}
+		return &MehdBox{}
 	case "trex":
-		return &trexBox{}
+		return &TrexBox{}
 	case "moof":
-		return &moofBox{}
+		return &MoofBox{}
 	case "mfhd":
-		return &mfhdBox{}
+		return &MfhdBox{}
 	case "traf":
-		return &trafBox{}
+		return &TrafBox{}
 	case "tfhd":
-		return &tfhdBox{}
+		return &TfhdBox{}
 	case "trun":
-		return &trunBox{}
+		return &TrunBox{}
 	case "subs":
-		return &subsBox{}
+		return &SubsBox{}
 	case "mdat":
-		return &mdatBox{}
+		return &MdatBox{}
 	case "mfra":
-		return &mfraBox{}
+		return &MfraBox{}
 	case "tfra":
-		return &tfraBox{}
+		return &TfraBox{}
 	case "mfro":
-		return &mfroBox{}
+		return &MfroBox{}
 	case "udta":
-		return &udtaBox{}
+		return &UdtaBox{}
 	case "meta":
-		return &metaBox{}
+		return &MetaBox{}
 	}
 }
 
