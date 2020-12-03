@@ -83,7 +83,9 @@ func parseFullBox(r io.ReadSeeker, startOffset int64) (size uint64, offset int64
 	return
 }
 
-func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) (size uint64, _type string, fields Fields, children []Box, err error) {
+type BoxFactory func(string) Box
+
+func pcb(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext, newBox BoxFactory) (size uint64, _type string, fields Fields, children []Box, err error) {
 	var offset int64
 	size, offset, _type, fields, err = parseBox(r, startOffset)
 	if err != nil {
@@ -111,4 +113,12 @@ func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc Pars
 	}
 
 	return
+}
+
+func parseContainerBox(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) (size uint64, _type string, fields Fields, children []Box, err error) {
+	return pcb(r, startOffset, pp, pc, newBox)
+}
+
+func parseContainerBoxWithFactory(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext, newBox BoxFactory) (size uint64, _type string, fields Fields, children []Box, err error) {
+	return pcb(r, startOffset, pp, pc, newBox)
 }

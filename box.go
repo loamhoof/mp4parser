@@ -61,6 +61,8 @@ func newBox(_type string) Box {
 		return &StsdBox{}
 	case "vide_se":
 		return &VisualSampleEntry{}
+	case "meta_se":
+		return &MetadataSampleEntry{}
 	case "avcC":
 		return &AvcCBox{}
 	case "btrt":
@@ -111,6 +113,10 @@ func newBox(_type string) Box {
 		return &UdtaBox{}
 	case "meta":
 		return &MetaBox{}
+	case "ilst":
+		return &IlstBox{}
+	case "GPMF":
+		return &GPMFBox{}
 	}
 }
 

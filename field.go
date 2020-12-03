@@ -2,6 +2,7 @@ package mp4parser
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type Field struct {
@@ -13,7 +14,9 @@ type Field struct {
 }
 
 func (f *Field) String() string {
-	return fmt.Sprintf("%s: %v", f.Key, f.Value)
+	quotedValue := strconv.Quote(fmt.Sprintf("%v", f.Value))
+
+	return fmt.Sprintf("%s: %v", f.Key, quotedValue[1:len(quotedValue)-1])
 }
 
 type Fields []*Field

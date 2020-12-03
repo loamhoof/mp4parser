@@ -2,6 +2,7 @@ package mp4parser
 
 import (
 	"io"
+	"strconv"
 )
 
 type UnknownBox struct {
@@ -28,5 +29,5 @@ func (b *UnknownBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc 
 }
 
 func (b *UnknownBox) Type() string {
-	return "#" + b._type + "#"
+	return strconv.Quote("#" + b._type + "#")
 }

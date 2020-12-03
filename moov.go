@@ -8,8 +8,9 @@ type MoovBox struct {
 	baseBox
 	children []Box
 	Mvhd     *MvhdBox
-	Trak     *TrakBox
+	Trak     []*TrakBox
 	Mvex     *MvexBox
+	Udta     *UdtaBox
 }
 
 func (b *MoovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc ParseContext) error {
@@ -26,9 +27,11 @@ func (b *MoovBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc Par
 		case *MvhdBox:
 			b.Mvhd = child
 		case *TrakBox:
-			b.Trak = child
+			b.Trak = append(b.Trak, child)
 		case *MvexBox:
 			b.Mvex = child
+		case *UdtaBox:
+			b.Udta = child
 		default:
 		}
 	}

@@ -52,7 +52,7 @@ func (b *StscBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc Par
 		entries[i] = entry
 	}
 
-	b.fields = append(b.fields, &Field{"entries", entryCount, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
 
 	return nil
 }

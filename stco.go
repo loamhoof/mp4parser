@@ -35,7 +35,7 @@ func (b *StcoBox) Parse(r io.ReadSeeker, startOffset int64, pp ParsePlan, pc Par
 		entries[i] = Fields{{"chunk_offset", binary.BigEndian.Uint32(b4), offset, 32, 0}}
 		offset += 4
 	}
-	b.fields = append(b.fields, &Field{"entries", entryCount, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
+	b.fields = append(b.fields, &Field{"entries", entries, entriesOffset, uint64(offset-entriesOffset) * 8, 0})
 
 	return nil
 }
